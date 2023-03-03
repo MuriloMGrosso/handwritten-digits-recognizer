@@ -1,0 +1,4 @@
+progress
+numpy
+Pillow
+tkinter
