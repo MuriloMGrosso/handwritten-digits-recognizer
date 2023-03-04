@@ -59,7 +59,7 @@ class Stats_Canvas():
             self.update_bar(bar,1,i)
         for i in range(num_bars):
             bar = self.canvas.create_rectangle(0,0,0,0,fill='#ffffff', width=0)
-            self.update_bar(bar,1,i)
+            self.update_bar(bar,0,i)
             self.bars.append(bar)
 
     def update_bar(self, bar, scale, offset):
