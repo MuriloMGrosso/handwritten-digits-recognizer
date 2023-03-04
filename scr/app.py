@@ -44,15 +44,44 @@ class Drawing_Canvas():
 
     def evaluate(self):
         output = net.evaluate(self.grid)
+        stats_canvas.update_bars(output)
+
+class Stats_Canvas():
+    def __init__(self):
+        self.width, self.height = 204, 308
+        self.canvas = tk.Canvas(root, bg='#000000')
+        self.canvas.place(width=self.width, height=self.height, relx=1.0, rely=0.0, anchor='ne')
+
+        num_bars = 10
+        self.bars = []
+        for i in range(num_bars):
+            bar = self.canvas.create_rectangle(0,0,0,0,fill='#555555', width=0)
+            self.update_bar(bar,1,i)
+        for i in range(num_bars):
+            bar = self.canvas.create_rectangle(0,0,0,0,fill='#ffffff', width=0)
+            self.update_bar(bar,1,i)
+            self.bars.append(bar)
+
+    def update_bar(self, bar, scale, offset):
+        border = 16
+        bar_height = (self.height - 11 * border) / 10
+        bar_width = self.width - 2 * border
+
+        self.canvas.coords(bar, border, offset * (border + bar_height) + border, border + scale * bar_width, (offset + 1) * (border + bar_height))
+
+    def update_bars(self,scales):
+        for i in range(len(self.bars)):
+            self.update_bar(self.bars[i],scales[i][0],i)
 
 root = tk.Tk()
-root.geometry('308x308')
+root.geometry('512x512')
 root.resizable(False, False)
 root.title('Neural Network')
 
 net = neural.Network()
 net.load('../network_data/DigitsRecognizer.npy')
 
+stats_canvas = Stats_Canvas()
 drawing_canvas = Drawing_Canvas(308,28)
 
 root.mainloop()

@@ -68,6 +68,7 @@ class Network(object):
         for n in output:
             s += n[0]
         print("Answer: {0} ({1}%)".format(result, round(output[result][0]/s * 100, 2)))
+        return output / s
     
     def print(self):
         print("Accuracy: ", self.accuracy)
