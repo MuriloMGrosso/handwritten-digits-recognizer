@@ -1,13 +1,16 @@
 import numpy as np
 import random
 from progress.bar import Bar
+import data_manager
+import time
 
 class Network(object):
-    def __init__(self, layers_sizes=[]):
+    def __init__(self, layers_sizes=[], name="NewNetwork"):        
         self.num_layers = len(layers_sizes)
         self.biases = [np.random.randn(y, 1) for y in layers_sizes[1:]]
         self.weights = [np.random.randn(y, x) for x, y in zip(layers_sizes[:-1], layers_sizes[1:])]
         self.accuracy = 0
+        self.name = name
 
     def feedforward(self,a):
         for b, w in zip(self.biases, self.weights):
@@ -16,17 +19,28 @@ class Network(object):
 
     def train(self, training_data, epochs, batch_size, learning_rate, test_data=None):
         for epoch in range(epochs):
-            random.shuffle(training_data)
-            batches = [training_data[j:j + batch_size] for j in range(0, len(training_data), batch_size)]
-            print('Epoch {0}/{1}:'.format(epoch + 1, epochs))
-            bar = Bar('Training', max=len(training_data))
+            start_time = time.time()
+
+            randomized_training_data = data_manager.randomize_data(training_data)
+            random.shuffle(randomized_training_data)
+            batches = [randomized_training_data[j:j + batch_size] for j in range(0, len(randomized_training_data), batch_size)]
+            print("Epoch {0}/{1}:".format(epoch + 1, epochs))
+            bar = Bar("Training", max=len(randomized_training_data))
             for batch in batches:
                 self.update(batch, learning_rate)
                 bar.next(batch_size)
             bar.finish()
             if test_data:
-                self.accuracy = self.efficiency(test_data)
-                print('Accuracy: {0}%\n'.format(round(self.accuracy * 100, 2)))
+                self.accuracy = self.efficiency(data_manager.randomize_data(test_data))
+                print("Accuracy: {0}%".format(round(self.accuracy * 100, 2)))
+
+            end_time = time.time()
+            elapsed_time = int(end_time - start_time)
+            print("Took {0}s".format(elapsed_time))
+            print("{0}s left".format(elapsed_time * (epochs - epoch - 1)))
+            print("\n")
+
+            self.save()
 
     def update(self, batch, learning_rate):
         nabla_b = [np.zeros(b.shape) for b in self.biases]
@@ -71,23 +85,24 @@ class Network(object):
         return output / s
     
     def print(self):
-        print("Accuracy: ", self.accuracy)
-        print("Weights: ", self.weights)
-        print("Biases: ", self.biases)
+        print(self.name)
+        print("Accuracy: {0}%\n".format(round(self.accuracy * 100, 2)))
 
     def save(self):
         print("Saving...")
-        np.save('../network_data/DigitsRecognizer.npy', np.array([self.weights, self.biases, [self.accuracy]], dtype=object))
+        np.save(f'../network_data/{self.name}.npy', np.array([self.weights, self.biases, [self.accuracy], [self.name]], dtype=object))
         print("Done!\n")
 
     def load(self, filename):
         print("Loading...")
-        content = np.load(filename, allow_pickle=True)
+        content = np.load(f'../network_data/{filename}.npy', allow_pickle=True)
         self.weights = content[0]
         self.biases = content[1]
         self.num_layers = len(self.biases) + 1
         self.accuracy = content[2][0]
+        self.name = content[3][0]
         print("Done!\n")
+        self.print()
 
 def sigmoid(x):
     return 1.0 / (1.0 + np.exp(-x))

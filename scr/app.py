@@ -1,13 +1,12 @@
 import tkinter as tk
 import numpy as np
 import neural_network as neural
+import math
+import colorsys
 
 class Drawing_Canvas():
     def __init__(self, canvas_size, grid_size):
-        self.background_color = '#E5FCC2'
-        self.main_color = '#111111'
-
-        self.canvas = tk.Canvas(root, bg=self.background_color)
+        self.canvas = tk.Canvas(root, bg='#ffffff')
         self.canvas.place(width=canvas_size, height=canvas_size)
 
         self.canvas_per_grid = canvas_size/grid_size
@@ -20,23 +19,36 @@ class Drawing_Canvas():
         self.canvas.bind('<Button-3>',self.erase)
     
     def draw(self,event):
-        x, y = self.canvas_to_grid(event)
+        x, y, dist_center = self.canvas_to_grid(event)
         if x < self.grid_size and y < self.grid_size:
-            self.set_pixel(x, y, self.main_color)
-            self.grid[int(y * self.grid_size + x)] = [255]
+            index = int(y * self.grid_size + x)
+            self.grid[index] = np.clip(int(255*(1 - dist_center)) + self.grid[index],0,255)
+            self.set_pixel(x, y, hsv_to_hex(0,0,255 - int(self.grid[index][0])))
             evaluate(self.grid)
 
     def erase(self, event):
-        x, y = self.canvas_to_grid(event)
+        x, y, dist_center = self.canvas_to_grid(event)
         if x < self.grid_size and y < self.grid_size:
-            self.set_pixel(x, y, self.background_color)
-            self.grid[int(y * self.grid_size + x)] = [0]
+            index = int(y * self.grid_size + x)
+            self.grid[index] = np.clip(self.grid[index] - int(255*(1 - dist_center)),0,255)
+            self.set_pixel(x, y, hsv_to_hex(0,0,255 - int(self.grid[index][0])))
             evaluate(self.grid)
+
+    def clear(self):
+        self.canvas.create_rectangle(0, 0, self.grid_size * self.canvas_per_grid,  self.grid_size * self.canvas_per_grid, fill='#ffffff', width=0)
+        self.grid = np.zeros((self.grid_size * self.grid_size,1))
+        evaluate(self.grid)  
+
+    def fill(self):  
+        self.canvas.create_rectangle(0, 0, self.grid_size * self.canvas_per_grid,  self.grid_size * self.canvas_per_grid, fill='#000000', width=0)
+        self.grid = np.ones((self.grid_size * self.grid_size,1)) * 255
+        evaluate(self.grid)     
 
     def canvas_to_grid(self, event):
         x, y = event.x, event.y
         grid_x, grid_y = x//self.canvas_per_grid, y//self.canvas_per_grid
-        return grid_x, grid_y
+        dist_center = math.sqrt((grid_x + 0.5 - x/self.canvas_per_grid)**2 + (grid_y + 0.5 - y/self.canvas_per_grid)**2)
+        return grid_x, grid_y, dist_center
 
     def set_pixel(self,x,y,color):
         fixed_x, fixed_y = x * self.canvas_per_grid, y * self.canvas_per_grid
@@ -83,6 +95,10 @@ def evaluate(data):
     stats_canvas.update_bars(output)
     label.config(text=f"{np.argmax(output)}")
 
+def hsv_to_hex(h, s, v):
+    r, g, b = colorsys.hsv_to_rgb(h, s, v)
+    return '#{:02x}{:02x}{:02x}'.format(r, g, b)
+
 root = tk.Tk()
 root.geometry('512x512')
 root.config(bg='#45ADA8')
@@ -90,11 +106,16 @@ root.resizable(False, False)
 root.title('Neural Network')
 
 net = neural.Network()
-net.load('../network_data/DigitsRecognizer.npy')
+net.load('DigitsRecognizer')
 
 stats_canvas = Stats_Canvas()
 drawing_canvas = Drawing_Canvas(308,28)
 label = tk.Label(root, text="?", font=("Arial", 128), fg='#E5FCC2', bg='#45ADA8')
 label.place(x=100, y=310)
+
+clear_button = tk.Button(root,text="CLEAR",command=drawing_canvas.clear, font=("Arial", 8))
+clear_button.pack()
+fill = tk.Button(root,text="FILL",command=drawing_canvas.fill, font=("Arial", 8))
+fill.pack()
 
 root.mainloop()
