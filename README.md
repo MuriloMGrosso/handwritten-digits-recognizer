@@ -27,7 +27,7 @@ train_network.py: Trains the network using the MNIST dataset.
 app.py: Creates a canvas to test the AI. The network will try to predict the user's drawing in real time.
 > python3 app.py
 
-There's a folder named "network_data" where the network data is saved.
+There's a folder named "network_data" where the network information (name, weights, biases, accuracy) is saved.
 
 ------------------------------------------------------------------------------------------------------
 
