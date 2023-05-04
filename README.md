@@ -39,5 +39,3 @@ REFERENCES:
 
 This project was made for academic purposes.
 Feel free to use it.
-
-By Murilo M. Grosso.
