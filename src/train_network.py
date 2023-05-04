@@ -6,4 +6,4 @@ net = neural.Network()
 net.load("DigitsRecognizer0.2")
 
 training_data, test_data = data_manager.get_data()
-net.train(training_data, 480, 100, 3.0, test_data)
+net.train(training_data, 100, 100, 0.03, test_data)

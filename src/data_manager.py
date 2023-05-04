@@ -63,7 +63,7 @@ def randomize_data(data):
     for i in range(len(data)):
         image = Image.fromarray(np.uint8(images_array[i].reshape(28,28)*255))
         image, scale = scale_image(image,(0.4,1.2),(0.8,1.2))
-        image = rotate_image(image,30)
+        image = rotate_image(image,10)
         image = offset_image(image, (1.2-scale)*10)
 
         noise_weight = random.uniform(0.01,0.1)
@@ -71,6 +71,9 @@ def randomize_data(data):
 
         if bool(random.getrandbits(1)):
             image_array = np.ones((28,28))*255 - image_array
+
+        # if i<5:
+        #     Image.fromarray(np.uint8(images_array[i].reshape(28,28)*255)).show()
 
         new_data.append((image_array.reshape(28 * 28, 1)/255.0, data[i][1]))
 
