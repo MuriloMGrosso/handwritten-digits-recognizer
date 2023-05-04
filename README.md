@@ -16,7 +16,7 @@ mnist_loader.py: Convert the mnist compressed files to numpy arrays.
 
 neural_network.py: The network. Its default format is: 
 - 784 neurons for the input layer (one neuron per pixel)
-- 1 hidden layer with 30 neurons
+- 2 hidden layers: one with 128 neurons and other with 30
 - 10 neurons for the output layer (one neuron per digit)
 
 To learn, the network uses the backpropagation algorithm to update the weights and biases.
