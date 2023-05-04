@@ -40,4 +40,4 @@ REFERENCES:
 This project was made for academic purposes.
 Feel free to use it.
 
-Made by Murilo M. Grosso.
+By Murilo M. Grosso.
